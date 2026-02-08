@@ -7,10 +7,17 @@ import '../../data/repositories/epi_repository.dart';
 
 /// Liste des EPI, stock (recalculé via mouvements), alertes seuil.
 class StockPage extends StatefulWidget {
-  const StockPage({super.key, this.showBackButton = true});
+  const StockPage({
+    super.key,
+    this.showBackButton = true,
+    this.onCriticalCountUpdated,
+  });
 
   /// Si false (ex. dans MainShellPage avec bottom nav), pas de bouton retour.
   final bool showBackButton;
+
+  /// Appelé avec le nombre d'EPI en stock critique (pour le badge Alertes de la navbar).
+  final void Function(int count)? onCriticalCountUpdated;
 
   @override
   State<StockPage> createState() => _StockPageState();
@@ -46,14 +53,17 @@ class _StockPageState extends State<StockPage> {
         _stockByEpi.addAll(stocks);
         _loading = false;
       });
+      int criticalCount = 0;
       for (final e in _epis) {
         if (e.id != null) {
           final s = _stockByEpi[e.id!] ?? 0;
           if (e.seuilMin > 0 && s <= e.seuilMin) {
+            criticalCount++;
             _notif.showStockAlert(e.designation, s);
           }
         }
       }
+      widget.onCriticalCountUpdated?.call(criticalCount);
     } catch (_) {
       setState(() => _loading = false);
     }
