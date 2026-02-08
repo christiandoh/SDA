@@ -93,6 +93,17 @@ class _StockPageState extends State<StockPage> {
           ),
         ],
       ),
+      floatingActionButton: _loading || _epis.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                await Navigator.of(context).pushNamed(AppRoutes.stockForm);
+                _load();
+              },
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Ajouter un EPI'),
+              backgroundColor: theme.colorScheme.primary,
+            ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _epis.isEmpty
@@ -237,19 +248,52 @@ class _StockPageState extends State<StockPage> {
                                                     .withValues(alpha: 0.6),
                                               ),
                                         ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Stock : $stock'
-                                        '${epi.seuilMin > 0 ? ' (seuil min. ${epi.seuilMin})' : ''}',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
                                               color: critical
                                                   ? AppTheme.criticalColor
-                                                  : null,
-                                              fontWeight: critical
-                                                  ? FontWeight.w600
-                                                  : null,
+                                                        .withValues(alpha: 0.15)
+                                                  : theme.colorScheme.primary
+                                                        .withValues(
+                                                          alpha: 0.12,
+                                                        ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
+                                            child: Text(
+                                              'Quantité : $stock',
+                                              style: theme.textTheme.titleSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: critical
+                                                        ? AppTheme.criticalColor
+                                                        : theme
+                                                              .colorScheme
+                                                              .primary,
+                                                  ),
+                                            ),
+                                          ),
+                                          if (epi.seuilMin > 0) ...[
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Seuil min. ${epi.seuilMin}',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withValues(alpha: 0.6),
+                                                  ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ],
                                   ),

@@ -65,11 +65,37 @@ class EpiRepository {
     return db.insert(_table, epi.toMap());
   }
 
-  Future<int> update(EpiModel epi) async {
-    if (epi.id == null) return 0;
+  /// Met à jour un EPI existant (seules les colonnes modifiables sont écrites).
+  Future<int> update(
+    int id, {
+    required String code,
+    required String designation,
+    required int seuilMin,
+  }) async {
     final db = _db.db;
     if (db == null) return 0;
-    return db.update(_table, epi.toMap(), where: 'id = ?', whereArgs: [epi.id]);
+    final updated = await db.update(
+      _table,
+      {
+        'code': code.isEmpty ? null : code,
+        'designation': designation,
+        'seuil_min': seuilMin,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return updated;
+  }
+
+  /// Met à jour un EPI à partir du modèle (pour compatibilité).
+  Future<int> updateFromModel(EpiModel epi) async {
+    if (epi.id == null) return 0;
+    return update(
+      epi.id!,
+      code: epi.code,
+      designation: epi.designation,
+      seuilMin: epi.seuilMin,
+    );
   }
 
   Future<int> delete(int id) async {

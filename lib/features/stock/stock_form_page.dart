@@ -24,6 +24,7 @@ class _StockFormPageState extends State<StockFormPage> {
   late TextEditingController _codeController;
   late TextEditingController _designationController;
   late TextEditingController _seuilMinController;
+  late TextEditingController _quantiteInitialeController;
   late TextEditingController _movementQtyController;
   late TextEditingController _movementCommentController;
 
@@ -42,6 +43,7 @@ class _StockFormPageState extends State<StockFormPage> {
     _seuilMinController = TextEditingController(
       text: widget.epi?.seuilMin.toString() ?? '0',
     );
+    _quantiteInitialeController = TextEditingController(text: '0');
     _movementQtyController = TextEditingController();
     _movementCommentController = TextEditingController();
     if (_isEdit && widget.epi?.id != null) {
@@ -60,6 +62,7 @@ class _StockFormPageState extends State<StockFormPage> {
     _codeController.dispose();
     _designationController.dispose();
     _seuilMinController.dispose();
+    _quantiteInitialeController.dispose();
     _movementQtyController.dispose();
     _movementCommentController.dispose();
     super.dispose();
@@ -72,15 +75,17 @@ class _StockFormPageState extends State<StockFormPage> {
     final seuilMin = int.tryParse(_seuilMinController.text.trim()) ?? 0;
     final now = DateTime.now().toIso8601String();
 
-    if (_isEdit && widget.epi != null) {
-      final updated = widget.epi!.copyWith(
-        code: code.isEmpty ? null : code,
+    if (_isEdit && widget.epi != null && widget.epi!.id != null) {
+      await _epiRepo.update(
+        widget.epi!.id!,
+        code: code,
         designation: designation,
         seuilMin: seuilMin,
       );
-      await _epiRepo.update(updated);
+      if (mounted)
+        showGlassSnackBar(context, message: 'Modifications enregistrées');
     } else {
-      await _epiRepo.insert(
+      final id = await _epiRepo.insert(
         EpiModel(
           code: code,
           designation: designation,
@@ -89,6 +94,19 @@ class _StockFormPageState extends State<StockFormPage> {
           dateCreation: now,
         ),
       );
+      final qteInit =
+          int.tryParse(_quantiteInitialeController.text.trim()) ?? 0;
+      if (id > 0 && qteInit > 0) {
+        await _movementRepo.insert(
+          StockMovementModel(
+            epiId: id,
+            type: MovementType.entree,
+            quantite: qteInit,
+            date: now,
+            commentaire: 'Quantité initiale',
+          ),
+        );
+      }
     }
     if (mounted) Navigator.of(context).pop(true);
   }
@@ -169,6 +187,17 @@ class _StockFormPageState extends State<StockFormPage> {
               keyboardType: TextInputType.number,
             ),
             if (!_isEdit) ...[
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _quantiteInitialeController,
+                decoration: const InputDecoration(
+                  labelText: 'Quantité initiale (optionnel)',
+                  hintText: '0 = vous ajouterez des entrées plus tard',
+                  helperText:
+                      'Stock de départ : sera enregistré comme une entrée.',
+                ),
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

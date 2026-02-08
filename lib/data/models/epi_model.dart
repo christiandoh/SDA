@@ -3,6 +3,8 @@ class EpiModel {
   final int? id;
   final String code;
   final String designation;
+
+  /// Quantité en stock (nombre d'unités). En base, peut être 0 ; la quantité affichée est souvent recalculée à partir des mouvements (entrées/sorties).
   final int stock;
   final int seuilMin;
   final String dateCreation;
@@ -15,6 +17,9 @@ class EpiModel {
     required this.seuilMin,
     required this.dateCreation,
   });
+
+  /// Alias pour [stock] : quantité d'unités en stock.
+  int get quantity => stock;
 
   bool get isCritical => seuilMin > 0 && stock <= seuilMin;
 
