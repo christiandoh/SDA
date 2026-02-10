@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../data/models/epi_model.dart';
 import '../../shared/widgets/glass_snackbar.dart';
@@ -31,6 +32,7 @@ class _StockFormPageState extends State<StockFormPage> {
   bool _isEdit = false;
   int _currentStock = 0;
   MovementType _movementType = MovementType.entree;
+  List<StockMovementModel> _movements = [];
 
   @override
   void initState() {
@@ -54,7 +56,11 @@ class _StockFormPageState extends State<StockFormPage> {
   Future<void> _loadStock() async {
     if (widget.epi?.id == null) return;
     final s = await _epiRepo.getStockFromMovements(widget.epi!.id!);
-    setState(() => _currentStock = s);
+    final moves = await _movementRepo.getByEpiId(widget.epi!.id!);
+    setState(() {
+      _currentStock = s;
+      _movements = moves;
+    });
   }
 
   @override
@@ -138,9 +144,116 @@ class _StockFormPageState extends State<StockFormPage> {
     _movementQtyController.clear();
     _movementCommentController.clear();
     await _loadStock();
-    setState(() {});
     if (mounted) {
       showGlassSnackBar(context, message: 'Mouvement enregistré');
+    }
+  }
+
+  Future<void> _deleteMovement(StockMovementModel m) async {
+    if (widget.epi?.id == null || m.id == null) return;
+    final theme = Theme.of(context);
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          barrierColor: Colors.black.withValues(alpha: 0.25),
+          builder: (ctx) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.6),
+                          Colors.white.withValues(alpha: 0.12),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 22,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: theme.colorScheme.error,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Supprimer le mouvement ?',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Cette entrée/sortie sera définitivement supprimée et le stock sera recalculé.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.8,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: const Text('Annuler'),
+                            ),
+                            const SizedBox(width: 8),
+                            FilledButton.tonal(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: theme.colorScheme.error
+                                    .withValues(alpha: 0.85),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: const Text('Supprimer'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ) ??
+        false;
+    if (!confirmed) return;
+
+    await _movementRepo.delete(m.id!, widget.epi!.id!);
+    await _loadStock();
+    if (mounted) {
+      showGlassSnackBar(context, message: 'Mouvement supprimé');
     }
   }
 
@@ -198,6 +311,115 @@ class _StockFormPageState extends State<StockFormPage> {
                 ),
                 keyboardType: TextInputType.number,
               ),
+              const SizedBox(height: 24),
+              Text(
+                'Historique des mouvements',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              if (_movements.isEmpty)
+                Text(
+                  'Aucun mouvement enregistré pour cet EPI.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _movements.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final m = _movements[index];
+                    final isEntree = m.type == MovementType.entree;
+                    final color = isEntree
+                        ? Colors.green.shade600
+                        : theme.colorScheme.error;
+                    final sign = isEntree ? '+' : '-';
+                    String dateLabel;
+                    try {
+                      final d = DateTime.parse(m.date);
+                      dateLabel =
+                          '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+                    } catch (_) {
+                      dateLabel = m.date;
+                    }
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceVariant.withValues(
+                          alpha: 0.3,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              isEntree
+                                  ? Icons.arrow_downward_rounded
+                                  : Icons.arrow_upward_rounded,
+                              size: 18,
+                              color: color,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$sign${m.quantite}',
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    color: color,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  dateLabel,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                if (m.commentaire != null &&
+                                    m.commentaire!.isNotEmpty)
+                                  Text(
+                                    m.commentaire!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_forever_rounded,
+                              size: 22,
+                            ),
+                            color: theme.colorScheme.error,
+                            onPressed: () => _deleteMovement(m),
+                            tooltip: 'Supprimer ce mouvement',
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

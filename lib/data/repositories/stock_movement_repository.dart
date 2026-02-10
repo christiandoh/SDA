@@ -35,4 +35,12 @@ class StockMovementRepository {
     final list = await db.query(_table, orderBy: 'date DESC, id DESC');
     return list.map(StockMovementModel.fromMap).toList();
   }
+
+  /// Supprime un mouvement et recalcule le stock EPI associé.
+  Future<void> delete(int id, int epiId) async {
+    final db = _db.db;
+    if (db == null) return;
+    await db.delete(_table, where: 'id = ?', whereArgs: [id]);
+    await _epiRepo.syncStockFromMovements(epiId);
+  }
 }

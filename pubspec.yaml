@@ -67,6 +67,9 @@ flutter:
 
   assets:
     - assets/logo.jpeg
+    - assets/login.jpg
+    - assets/chantier.jpg
+    - assets/chantier2.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

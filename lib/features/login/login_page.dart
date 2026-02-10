@@ -81,123 +81,120 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.primary.withValues(alpha: 0.85),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.lock_rounded,
-                  size: 64,
-                  color: theme.colorScheme.onPrimary,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Connexion',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Entrez votre code à 4 chiffres',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: 260,
-                  child: TextField(
-                    controller: _nameController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(
-                      hintText: 'Nom d\'utilisateur',
-                      hintStyle: TextStyle(
-                        color: theme.colorScheme.onPrimary.withValues(
-                          alpha: 0.6,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: theme.colorScheme.onPrimary.withValues(
-                        alpha: 0.2,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    style: theme.textTheme.titleSmall?.copyWith(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset('assets/login.jpg', fit: BoxFit.cover),
+          Container(color: Colors.black.withValues(alpha: 0.35)),
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.lock_rounded,
+                      size: 64,
                       color: theme.colorScheme.onPrimary,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (i) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: SizedBox(
-                        width: 56,
-                        child: TextField(
-                          controller: _controllers[i],
-                          focusNode: _focusNodes[i],
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          maxLength: 1,
-                          obscureText: true,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          decoration: InputDecoration(
-                            counterText: '',
-                            filled: true,
-                            fillColor: theme.colorScheme.onPrimary.withValues(
-                              alpha: 0.2,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          onChanged: (_) {
-                            if (_controllers[i].text.isNotEmpty && i < 3) {
-                              _focusNodes[i + 1].requestFocus();
-                            }
-                            _onDigitChanged();
-                          },
+                    const SizedBox(height: 24),
+                    Text(
+                      'Connexion',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Entrez votre code à 4 chiffres',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onPrimary.withValues(
+                          alpha: 0.9,
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 260,
+                      child: TextField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: InputDecoration(
+                          hintText: 'Nom d\'utilisateur',
+                          hintStyle: TextStyle(
+                            color: theme.colorScheme.onPrimary.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.2,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(4, (i) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: SizedBox(
+                            width: 56,
+                            child: TextField(
+                              controller: _controllers[i],
+                              focusNode: _focusNodes[i],
+                              keyboardType: TextInputType.number,
+                              textAlign: TextAlign.center,
+                              maxLength: 1,
+                              obscureText: true,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              decoration: InputDecoration(
+                                counterText: '',
+                                filled: true,
+                                fillColor: theme.colorScheme.onPrimary
+                                    .withValues(alpha: 0.2),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onChanged: (_) {
+                                if (_controllers[i].text.isNotEmpty && i < 3) {
+                                  _focusNodes[i + 1].requestFocus();
+                                }
+                                _onDigitChanged();
+                              },
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

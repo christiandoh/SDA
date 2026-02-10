@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../excel/excel_export_service.dart';
 import '../../shared/widgets/glass_snackbar.dart';
+import '../../shared/widgets/construction_background.dart';
+import '../../shared/widgets/glass_panel.dart';
 import 'change_pin_sheet.dart';
 
 /// Page paramètres (informations app, export Excel).
@@ -60,18 +62,8 @@ class SettingsPage extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return GlassPanel(
+      padding: EdgeInsets.zero,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: _iconContainer(context, icon),
@@ -135,59 +127,61 @@ class SettingsPage extends StatelessWidget {
               )
             : null,
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: [
-          _sectionHeader(context, 'Application', isFirst: true),
-          _settingsTile(
-            context: context,
-            icon: Icons.business_rounded,
-            title: 'À propos',
-            subtitle: 'SOTASERV - CI SARL - Gestion EPI et incidents',
-            onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'SOTASERV - CI SARL',
-                applicationVersion: '1.0.0',
-                applicationIcon: Icon(
-                  Icons.shield_rounded,
-                  color: theme.colorScheme.primary,
-                  size: 48,
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          _settingsTile(
-            context: context,
-            icon: Icons.lock_rounded,
-            title: 'Modifier le code',
-            subtitle: 'Changer le code de connexion (4 chiffres)',
-            onTap: () => showChangePinSheet(context),
-          ),
-          _sectionHeader(context, 'Données'),
-          _settingsTile(
-            context: context,
-            icon: Icons.table_chart_rounded,
-            title: 'Exporter en Excel',
-            subtitle: 'Fichier .xlsx (EPI, mouvements, incidents)',
-            onTap: () => _exportExcel(context),
-          ),
-          const SizedBox(height: 8),
-          _settingsTile(
-            context: context,
-            icon: Icons.dns_rounded,
-            title: 'Données locales',
-            subtitle: 'SQLite - mode hors ligne',
-          ),
-          _sectionHeader(context, 'Alertes'),
-          _settingsTile(
-            context: context,
-            icon: Icons.notifications_rounded,
-            title: 'Notifications',
-            subtitle: 'Alertes stock critique',
-          ),
-        ],
+      body: ConstructionBackground(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          children: [
+            _sectionHeader(context, 'Application', isFirst: true),
+            _settingsTile(
+              context: context,
+              icon: Icons.business_rounded,
+              title: 'À propos',
+              subtitle: 'SOTASERV - CI SARL - Gestion EPI et incidents',
+              onTap: () {
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'SOTASERV - CI SARL',
+                  applicationVersion: '1.0.0',
+                  applicationIcon: Icon(
+                    Icons.shield_rounded,
+                    color: theme.colorScheme.primary,
+                    size: 48,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            _settingsTile(
+              context: context,
+              icon: Icons.lock_rounded,
+              title: 'Modifier le code',
+              subtitle: 'Changer le code de connexion (4 chiffres)',
+              onTap: () => showChangePinSheet(context),
+            ),
+            _sectionHeader(context, 'Données'),
+            _settingsTile(
+              context: context,
+              icon: Icons.table_chart_rounded,
+              title: 'Exporter en Excel',
+              subtitle: 'Fichier .xlsx (EPI, mouvements, incidents)',
+              onTap: () => _exportExcel(context),
+            ),
+            const SizedBox(height: 8),
+            _settingsTile(
+              context: context,
+              icon: Icons.dns_rounded,
+              title: 'Données locales',
+              subtitle: 'SQLite - mode hors ligne',
+            ),
+            _sectionHeader(context, 'Alertes'),
+            _settingsTile(
+              context: context,
+              icon: Icons.notifications_rounded,
+              title: 'Notifications',
+              subtitle: 'Alertes stock critique',
+            ),
+          ],
+        ),
       ),
     );
   }

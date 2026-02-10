@@ -3,6 +3,8 @@ import '../../app/routes.dart';
 import '../../app/theme.dart';
 import '../../data/models/incident_model.dart';
 import '../../data/repositories/incident_repository.dart';
+import '../../shared/widgets/construction_background.dart';
+import '../../shared/widgets/glass_panel.dart';
 
 /// Historique des accidents / incidents.
 class IncidentPage extends StatefulWidget {
@@ -63,104 +65,93 @@ class _IncidentPageState extends State<IncidentPage> {
           ),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _list.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.assignment_rounded,
-                      size: 40,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Aucun incident enregistré',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Déclarez un accident ou incident',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      await Navigator.of(
-                        context,
-                      ).pushNamed(AppRoutes.incidentForm);
-                      _load();
-                    },
-                    icon: const Icon(Icons.add_rounded),
-                    label: const Text('Déclarer un incident'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _list.length,
-                itemBuilder: (context, i) {
-                  final incident = _list[i];
-                  final severityColor = AppTheme.severityColor(
-                    incident.gravite,
-                  );
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
+      body: ConstructionBackground(
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _list.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.06,
-                            ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        child: InkWell(
-                          onTap: () async {
-                            await Navigator.of(context).pushNamed(
-                              AppRoutes.incidentForm,
-                              arguments: incident,
-                            );
-                            _load();
-                          },
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.assignment_rounded,
+                        size: 40,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Aucun incident enregistré',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Déclarez un accident ou incident',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await Navigator.of(
+                          context,
+                        ).pushNamed(AppRoutes.incidentForm);
+                        _load();
+                      },
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('Déclarer un incident'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _list.length,
+                  itemBuilder: (context, i) {
+                    final incident = _list[i];
+                    final severityColor = AppTheme.severityColor(
+                      incident.gravite,
+                    );
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GlassPanel(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () async {
+                              await Navigator.of(context).pushNamed(
+                                AppRoutes.incidentForm,
+                                arguments: incident,
+                              );
+                              _load();
+                            },
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -186,34 +177,61 @@ class _IncidentPageState extends State<IncidentPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: severityColor.withValues(
-                                                alpha: 0.2,
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: severityColor.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                              child: Text(
+                                                'Gravité ${incident.gravite}',
+                                                style: theme
+                                                    .textTheme
+                                                    .labelMedium
+                                                    ?.copyWith(
+                                                      color: severityColor,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                              ),
                                             ),
-                                            child: Text(
-                                              'Gravité ${incident.gravite}',
-                                              style: theme.textTheme.labelMedium
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              incident.date.isNotEmpty
+                                                  ? _formatDate(incident.date)
+                                                  : '-',
+                                              style: theme.textTheme.bodySmall
                                                   ?.copyWith(
-                                                    color: severityColor,
-                                                    fontWeight: FontWeight.w600,
+                                                    color: theme
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withValues(alpha: 0.7),
                                                   ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 8),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          incident.type.isEmpty
+                                              ? 'Incident'
+                                              : incident.type,
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        if (incident.zone.isNotEmpty)
                                           Text(
-                                            incident.date.isNotEmpty
-                                                ? _formatDate(incident.date)
-                                                : '-',
+                                            'Zone : ${incident.zone}',
                                             style: theme.textTheme.bodySmall
                                                 ?.copyWith(
                                                   color: theme
@@ -222,54 +240,32 @@ class _IncidentPageState extends State<IncidentPage> {
                                                       .withValues(alpha: 0.7),
                                                 ),
                                           ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        incident.type.isEmpty
-                                            ? 'Incident'
-                                            : incident.type,
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
-                                      if (incident.zone.isNotEmpty)
-                                        Text(
-                                          'Zone : ${incident.zone}',
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withValues(alpha: 0.7),
-                                              ),
-                                        ),
-                                      if (incident.responsable.isNotEmpty)
-                                        Text(
-                                          'Responsable : ${incident.responsable}',
-                                          style: theme.textTheme.bodySmall,
-                                        ),
-                                    ],
+                                        if (incident.responsable.isNotEmpty)
+                                          Text(
+                                            'Responsable : ${incident.responsable}',
+                                            style: theme.textTheme.bodySmall,
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 22,
-                                  color: theme.colorScheme.primary.withValues(
-                                    alpha: 0.6,
+                                  Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 22,
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.6,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    
+                  },
+                ),
               ),
-            ),
+      ),
     );
   }
 

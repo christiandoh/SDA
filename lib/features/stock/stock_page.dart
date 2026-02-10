@@ -4,6 +4,8 @@ import '../../app/theme.dart';
 import '../../core/services/notification_service.dart';
 import '../../data/models/epi_model.dart';
 import '../../data/repositories/epi_repository.dart';
+import '../../shared/widgets/construction_background.dart';
+import '../../shared/widgets/glass_panel.dart';
 
 /// Liste des EPI, stock (recalculé via mouvements), alertes seuil.
 class StockPage extends StatefulWidget {
@@ -104,110 +106,97 @@ class _StockPageState extends State<StockPage> {
               label: const Text('Ajouter un EPI'),
               backgroundColor: theme.colorScheme.primary,
             ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _epis.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      Icons.inventory_2_rounded,
-                      size: 40,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Aucun EPI',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Ajoutez votre premier équipement',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      await Navigator.of(
-                        context,
-                      ).pushNamed(AppRoutes.stockForm);
-                      _load();
-                    },
-                    icon: const Icon(Icons.add_rounded),
-                    label: const Text('Ajouter un EPI'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _epis.length,
-                itemBuilder: (context, i) {
-                  final epi = _epis[i];
-                  final stock = epi.id != null
-                      ? (_stockByEpi[epi.id!] ?? 0)
-                      : epi.stock;
-                  final critical = epi.seuilMin > 0 && stock <= epi.seuilMin;
-                  final iconData = _iconForEpi(epi.designation);
-                  final iconColor = critical
-                      ? AppTheme.criticalColor
-                      : theme.colorScheme.primary;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
+      body: ConstructionBackground(
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _epis.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
                       decoration: BoxDecoration(
-                        color: critical
-                            ? AppTheme.criticalColor.withValues(alpha: 0.08)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.06,
-                            ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        child: InkWell(
-                          onTap: () async {
-                            await Navigator.of(
-                              context,
-                            ).pushNamed(AppRoutes.stockForm, arguments: epi);
-                            _load();
-                          },
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.inventory_2_rounded,
+                        size: 40,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Aucun EPI',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ajoutez votre premier équipement',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await Navigator.of(
+                          context,
+                        ).pushNamed(AppRoutes.stockForm);
+                        _load();
+                      },
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('Ajouter un EPI'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _epis.length,
+                  itemBuilder: (context, i) {
+                    final epi = _epis[i];
+                    final stock = epi.id != null
+                        ? (_stockByEpi[epi.id!] ?? 0)
+                        : epi.stock;
+                    final critical = epi.seuilMin > 0 && stock <= epi.seuilMin;
+                    final iconData = _iconForEpi(epi.designation);
+                    final iconColor = critical
+                        ? AppTheme.criticalColor
+                        : theme.colorScheme.primary;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GlassPanel(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () async {
+                              await Navigator.of(
+                                context,
+                              ).pushNamed(AppRoutes.stockForm, arguments: epi);
+                              _load();
+                            },
                             child: Row(
                               children: [
                                 Container(
@@ -317,11 +306,11 @@ class _StockPageState extends State<StockPage> {
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
+      ),
     );
   }
 
